@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paging System Visualizer</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="project-title">Paging System Visualizer</h1>
+        <div id="controls">
+            <input type="number" id="page-number" placeholder="Page Number" min="0" max="5">
+            <input type="number" id="frame-number" placeholder="Frame Number" min="0" max="4">
+            <input type="text" id="frame-data" placeholder="Data">
+            <button id="store-btn">Store</button>
+            <button id="show-all-btn">Tables</button>
+            <button id="show-tree-btn">Show Tree Diagram</button>
+        </div>
+    </header>
+    
+    <!-- <div id="page-directory">Page Directory</div> -->
+    <div class="container-visualisation">
+        <div id="page-tables"></div>
+        <div id="tree-container"></div>
+    </div>
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const numPages = 6;
+            const numFrames = 5;
+            const pages = Array.from({ length: numPages }, () => Array.from({ length: numFrames }, () => ({ data: '' })));
+
+            const pageDirectoryDiv = d3.select("#page-directory");
+            const pageTablesDiv = d3.select("#page-tables");
+            const treeContainerDiv = d3.select("#tree-container");
+
+            function renderPageDirectory() {
+                pageDirectoryDiv.html("");
+                for (let i = 0; i < numPages; i++) {
+                    pageDirectoryDiv.append("div")
+                        .attr("class", "page-icon")
+                        .attr("data-page", i)
+                        .text(`Page ${i}`)
+                        .on("click", function() {
+                            showPage(parseInt(d3.select(this).attr("data-page")));
+                        });
+                }
+            }
+
+            function renderPageTable(pageNumber) {
+                let pageTableDiv = pageTablesDiv.select(`#page-table-${pageNumber}`);
+                if (pageTableDiv.empty()) {
+                    pageTableDiv = pageTablesDiv.append("div")
+                        .attr("id", `page-table-${pageNumber}`)
+                        .attr("class", "table");
+                } else {
+                    pageTableDiv.html("");
+                }
+
+                const pageTable = pageTableDiv.append("table");
+                pageTable.append("thead").append("tr")
+                    .append("th")
+                    .attr("colspan", 2)
+                    .text(`Page ${pageNumber}`);
+
+                pageTable.append("thead").append("tr")
+                    .selectAll("th")
+                    .data(["Frame", "Data"])
+                    .enter()
+                    .append("th")
+                    .text(d => d);
+
+                const pageTableBody = pageTable.append("tbody");
+                pages[pageNumber].forEach((frame, frameIndex) => {
+                    const row = pageTableBody.append("tr");
+                    row.append("td").text(frameIndex);
+                    row.append("td").text(frame.data).attr("id", `data-${pageNumber}-${frameIndex}`).classed("data-cell", true);
+                });
+            }
+
+            function renderAllPageTables() {
+                pageTablesDiv.html("");
+                pages.forEach((_, pageIndex) => {
+                    renderPageTable(pageIndex);
+                });
+            }
+
+            function updateTreeDiagram() {
+                treeContainerDiv.html("");
+                const treeData = {
+                    name: "Pages",
+                    children: pages.map((page, pageIndex) => ({
+                        name: `Page ${pageIndex}`,
+                        children: page.map((frame, frameIndex) => ({
+                            name: `Frame ${frameIndex}`,
+                            children: [{ name: `Data: ${frame.data}` }]
+                        }))
+                    }))
+                };
+                renderTree(treeData);
+            }
+
+            function renderTree(treeData) {
+                const margin = { top: 50, right: 120, bottom: 50, left: 120 };
+                const width = 960 - margin.left - margin.right;
+                const height = 600 - margin.top - margin.bottom;
+
+                const svg = treeContainerDiv.append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                const tree = d3.tree().size([height, width]);
+                const root = d3.hierarchy(treeData, d => d.children);
+                tree(root);
+
+                const link = svg.selectAll(".link")
+                    .data(root.links())
+                    .enter().append("path")
+                    .attr("class", "link")
+                    .attr("d", d3.linkHorizontal()
+                        .x(d => d.y)
+                        .y(d => d.x))
+                    .attr("stroke-width", 2);
+
+                const node = svg.selectAll(".node")
+                    .data(root.descendants())
+                    .enter().append("g")
+                    .attr("class", "node")
+                    .attr("transform", d => `translate(${d.y},${d.x})`);
+
+                node.append("circle")
+                    .attr("r", 10);
+
+                node.append("text")
+                    .attr("dy", ".35em")
+                    .attr("x", d => d.children ? -13 : 13)
+                    .style("text-anchor", d => d.children ? "end" : "start")
+                    .text(d => d.data.name);
+            }
+
+            function showPage(pageNumber) {
+                pageTablesDiv.selectAll(".table").style("display", "none");
+                pageTablesDiv.select(`#page-table-${pageNumber}`).style("display", "block");
+            }
+
+            function showAll() {
+                d3.select("#page-directory").style("display", "flex");
+                pageTablesDiv.style("display", "flex");
+                pageTablesDiv.style("overflow-y", "auto");
+                pageTablesDiv.style("max-height", "auto");
+                treeContainerDiv.style("display", "none");
+                renderAllPageTables();
+            }
+
+            function showTree() {
+                pageTablesDiv.style("display", "none");
+                treeContainerDiv.style("display", "block");
+                updateTreeDiagram();
+            }
+
+        function manualStore() {
+        const pageNumber = parseInt(document.getElementById("page-number").value);
+        const frameNumber = parseInt(document.getElementById("frame-number").value);
+        const frameData = document.getElementById("frame-data").value;
+
+        if (isNaN(pageNumber) || isNaN(frameNumber) || frameData === '') {
+            alert("Please enter valid page number, frame number, and data.");
+            return;
+        }
+
+        if (frameNumber < 0 || frameNumber >= numFrames || pageNumber < 0 || pageNumber >= numPages) {
+            alert("Invalid page or frame number.");
+            return;
+        }
+
+        if (pages[pageNumber][frameNumber].data !== '') {
+            alert(`Frame ${frameNumber} in Page ${pageNumber} is already occupied.`);
+            return;
+        }
+
+        const activePageIcon = pageDirectoryDiv.select(`[data-page="${pageNumber}"]`);
+        activePageIcon.style("transform", "scale(1.1)");
+        activePageIcon.style("background-color", "#d0ffd0");
+
+        setTimeout(() => {
+            activePageIcon.style("transform", "scale(1)");
+            activePageIcon.style("background-color", "#ffffff");
+            pages[pageNumber][frameNumber].data = frameData;
+            renderPageTable(pageNumber);
+            updateTreeDiagram();
+            const dataCell = d3.select(`#data-${pageNumber}-${frameNumber}`);
+            dataCell.classed("data-entering", true);
+
+            dataCell.transition()
+                .duration(2000)
+                .on("end", () => {
+                    dataCell.classed("data-entering", false);
+                });
+        }, 500);
+    }
+            renderPageDirectory();
+            renderAllPageTables();
+
+            document.getElementById("store-btn").addEventListener("click", manualStore);
+            document.getElementById("show-all-btn").addEventListener("click", showAll);
+            document.getElementById("show-tree-btn").addEventListener("click", showTree);
+        });
+    </script>
+</body>
+</html>

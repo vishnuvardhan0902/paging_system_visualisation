@@ -1,0 +1,181 @@
+/* General styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+}
+
+.project-title {
+    font-size: 30px;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+/* Header styles */
+header {
+    background-color: #007bff;
+    color: white;
+    padding: 40px 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* Controls and input styles */
+#controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#controls input[type="number"],
+#controls input[type="text"],
+#controls button {
+    background-color: #8ebaea;
+    color: #ffffff;
+    font-weight: bolder;
+    padding: 10px;
+    width: 15%;
+    margin-top: .2rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Main content container */
+.container-visualisation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+/* Pagination styles */
+#page-directory {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.page-icon {
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    background-color: #007bff;
+    color: white;
+    margin: 5px;
+}
+
+.page-icon:hover {
+    background-color: #0056b3;
+}
+
+.page-icon.active {
+    background-color: #28a745 !important;
+}
+
+/* Table styles */
+#page-tables {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.table {
+    flex: 1 1 45%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.data-cell {
+    background-color: #e7f3fe;
+}
+
+.data-entering {
+    animation: data-enter 2s ease-in-out;
+}
+
+@keyframes data-enter {
+    0% { background-color: #e7f3fe; transform: scale(1); }
+    50% { background-color: #cce0ff; transform: scale(1.1); }
+    100% { background-color: #e7f3fe; transform: scale(1); }
+}
+
+/* Tree visualization styles */
+#tree-container {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.node circle {
+    fill: #007bff;
+    stroke: #0056b3;
+    stroke-width: 1.5px;
+}
+
+.node text {
+    font: 12px sans-serif;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
+
+.hidden {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .table {
+        flex: 1 1 100%;
+    }
+}
